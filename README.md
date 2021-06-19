@@ -39,4 +39,49 @@ The word of the phrase will be searched on the whole that includes the vocabular
 
 <img width="561" alt="mode1_2" src="https://user-images.githubusercontent.com/84280247/122649627-d709c100-d158-11eb-8b18-41e3fbe9a2a2.PNG">
 
+# Quick start guide
+
+![giphy](https://user-images.githubusercontent.com/84280247/122650046-e38f1900-d15a-11eb-8d67-604f80385313.gif)
+
+## 1
+Words are stored in a txt file as its collection. 
+
+---> use left/right arrow key to move among modes of reading file. The first mode is " reading from all files ".
+
+---> Press 3 to REVIEW vocabulary in the file
+
+---> Press 4 to VIEW all vocabulary in the file
+
+---> Press 5 to MODIFY:
+
+And then
+
+-Press 5 to add word. (cannot add when is in mode of reading from all files
+
+-Press 2 to add file (file will MUST be stored in the "notebook" folder)
+
+***the exe file must be in an common folder with "data" folder and "notebook" folder for the program to load***
+
+-Press 3 to unconnect file (the txt file of words wont be deleted)
+
+-Press 4 to modify the number of questions per test
+
+---> Press 1 to look up
+
+***the process will search in all file**
+
+## 2
+For some situations* (there are a lot of word to add), You can add word directly on the file, according to this rule:
+
+----> in an sentence, use < > next to the word to locate which word needing to remember, and then write in < > the meaning
+
+EX: `the powers of a judge are defined<dinh nghia, dinh ro> by law`
+
+Or use \ to define that is a phrase
+
+EX: `There will be a big \clearance sale<chuong trinh giam gia xa kho> this week`
+
+
+
+
 

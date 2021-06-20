@@ -12,7 +12,8 @@ The main functions of my notebook are note words, review words, smart look-up.
 
 ## Note words ->put the words in context:
 
-_In my attempt to learn vocabulary, I realize that a good way to do it well is basing on their example, not the translating from vocabulary to its meaning._ 
+> _In my attempt to learn vocabulary, I realize that a good way to do it well is basing on their example, not the translating from vocabulary to its meaning._ 
+
 **In my notebook, to note words, we first need to write an example and then choose the words in that sentence that needs to remember.** This change of how we note something makes we concern more on the real-life situation of new words:
 
 <img width="467" alt="add_word" src="https://user-images.githubusercontent.com/84280247/122649411-eccab680-d157-11eb-8f95-7f18302c7c35.PNG">
@@ -23,7 +24,7 @@ _In my attempt to learn vocabulary, I realize that a good way to do it well is b
 
 ## Review vocabulary ->the mix between English and Vietnamese:
 
-This way is known as how Jews people learn English to remember vocabulary longer, and the context of it.
+> This way is known as how Jews people learn English to remember vocabulary longer, and the context of it.
 
 ***Also, the printed question is random and THEN BASES ON how many times we answer this question wrong before and how many times it is printed!***
 
@@ -48,6 +49,10 @@ Words are stored in a txt file as its collection.
 
 ---> use left/right arrow key to move among modes of reading file. The first mode is " reading from all files ".
 
+---> Press 1 to look up
+
+***the process will search in all files**
+
 ---> Press 3 to REVIEW vocabulary in the file
 
 ---> Press 4 to VIEW all vocabulary in the file
@@ -66,10 +71,6 @@ And then
 
 -Press 4 to modify the number of questions per test
 
----> Press 1 to look up
-
-***the process will search in all file**
-
 ## 2
 For some situations* (there are a lot of word to add), You can add word directly on the file, according to this rule:
 
@@ -79,9 +80,17 @@ EX: `the powers of a judge are defined<dinh nghia, dinh ro> by law`
 
 Or use \ to define that is a phrase
 
-EX: `There will be a big \clearance sale<chuong trinh giam gia xa kho> this week`
+EX: ```There will be a big \clearance sale<chuong trinh giam gia xa kho> this week```
 
+# The story
 
+## why do I create this? 
+
+I have started to write some of the first lines of code when I had a lot of free time before attending the university last year. I decided to learn English more. I bought a book and this was a great book. But as I remembered more words from the book, I noticed that I began to forget the ones I had previously forgotten but I don't know how to review because I had learned so much. Or when I want to look back at some of the contexts of the word or collocations in the previous parts, I have to check all the pages.  Or when I see some necessary new word on Intenet, but I don't want to note it down the paper. That's why I spend all my free time creating a notebook for myself. And it helps me a lot.
+
+From this time to now is more than 10 months, when I have free time, I will manage to add something new or find errors to fix in my program. The most recent update for this is that I apply OOP to my whole code, after studying this course from the school. It makes my code cleaner, and more well constructed. I'm still improving it to make it more better
+
+Above all, LY Word is not only my free time simple scripts, but also my pride, I study a lot from this!
 
 
 

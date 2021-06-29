@@ -21,7 +21,10 @@
     <ClCompile Include="screen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="searchstring.cpp">
+    <ClCompile Include="strsearch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dict.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +32,10 @@
     <ClInclude Include="screen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="searchstring.h">
+    <ClInclude Include="strsearch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dict.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

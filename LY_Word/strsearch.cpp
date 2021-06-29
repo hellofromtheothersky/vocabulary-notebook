@@ -1,5 +1,5 @@
 #pragma once
-#include"searchstring.h"
+#include"strsearch.h"
 int intoint(char a)
 {
     if ('a' <= a && a <= 'z') return int(a) - 'a' + 1;

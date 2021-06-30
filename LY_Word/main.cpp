@@ -12,41 +12,33 @@ typedef pair<int, int> pa_int2;
 typedef pair<int, pa_int2> pa_int3;
 Hash_resource Hash;
 dict Dict;
+
+void Norming_string(string& s);
+
 class Word;
 class Word_parcel;
-void Norming_string(string& s);
 class File_management
 {
     string all_file[20];
-    int defmode, socau, n;
+    int socau, n;
     void Check_files();
-    void Read_words(Word_parcel &P);
 public:
     File_management()
     {
         n = 0;
-        defmode = 0; 
         socau = 0;
     }
-    int Num_of_que()
-    {
-        return socau;
-    }
-    int Num_of_file()
-    {
-        return n;
-    }
-    void Switch_mode(int k);
-    int mode();
-    string name_of_file(int k);
-    string deffile();
-    string deffilef();
+    int Num_of_que();
+    int Num_of_file();
+    string file_name(int k);
+    string file_address(int);
+    string file_f_address(int);
     void Collect(Word_parcel &P);
     void Update_numofque(int socau);
     void Update_score(Word_parcel P);
     void Add_file(string s);
-    void Unconnected_files(int* file, int sl);
-    void Add_word(Word W);
+    void Unconnect_files(int* file, int sl);
+    void Add_word(Word_parcel, int);
 };
 class Word
 {
@@ -71,10 +63,7 @@ public:
     int ran; // dung de random cau hoi
     Word(string w = "", string m = "", string e = "", vector<string> GC = {}, int c1 = -1, int c2 = -1)
     {
-        fr = 0;
-        ff = 0;
-        sp = 0;
-        ran = 0;
+        fr = 0; ff = 0; sp = 0; ran = 0;
         this->w = w;
         this->m = m;
         this->e = e;
@@ -88,8 +77,8 @@ public:
     bool Get_word(vector<string> line, Word pre = Word()); //get from file
     void Get_word(); //get from program
     bool Get_word(Word pre); //get from program for similar word
+    vector<string> lines(bool newword=1);
     friend class Search_solution;
-    friend vector<string> Word_to_lines(Word);
 };
 class Word_parcel
 {
@@ -125,9 +114,19 @@ public:
         pos_area.push_back(1);
         a.push_back(Word());
     }
-    void Update_area(File_management F)
+    Word& operator [] (int i)
     {
-        this->area = F.mode();
+        return a[i];
+    }
+    void Switch_area(int area)
+    {
+        if (area < 0) area = num_of_area; 
+        else if (area > num_of_area) area = 0;
+        this->area = area;
+    }
+    int Area()
+    {
+        return area;
     }
     int from();
     int to();
@@ -142,8 +141,6 @@ public:
     void sapxeptanso();
     void Print_word(int pos = 0, int stt = 1, int searchmode = 0);
     friend class Search_solution;
-    friend void MODE3(File_management, Word_parcel);
-    friend void File_management::Update_score(Word_parcel P);
 };
 class Search_solution
 {
@@ -164,14 +161,17 @@ public:
     void Search_all(string s, File_management F, Word_parcel& P);
     void Show_results(File_management F, Word_parcel P);
 };
-void Add_words(File_management F);
 void show_status(File_management F, Word_parcel p);
-void MODE1(File_management F, Word_parcel P);
 bool Collect_answers(string kq, int stt);
+
+void MODE1(File_management F, Word_parcel P);
 void MODE3(File_management F, Word_parcel P);
 void MODE4(Word_parcel P);
 void MODE5(File_management F, Word_parcel P);
 void MODE6();
+
+//MAIN
+
 int main()
 {
     clock_t start;
@@ -192,35 +192,22 @@ int main()
             cout << "2. Thong ke (x)\n";
             cout << "3. Kiem tra tu vung" << endl << endl;
             cout << "4. Tat ca tu vung\n";
-            cout << "5. Chinh sua\n";
+            cout << "5. Them\n";
             cout << "6  ?\n";
             ch = _getch();
             switch (ch)
             {
-            case '1':
-                MODE1(F, P);
-                break;
-            case '2':
-                break;
-            case '3':
-                MODE3(F, P);
-                break;
-            case '4':
-                MODE4(P);
-                break;
-            case '5':
-                MODE5(F, P);
-                break;
-            case '6':
-                MODE6();
-                break;
+            case '1': MODE1(F, P); break;
+            case '2': break;
+            case '3': MODE3(F, P); break;
+            case '4': MODE4(P); break;
+            case '5': MODE5(F, P); break;
+            case '6': MODE6(); break;
             case -32:
                 ch = _getch(); // de lay phim mui ten
-                F.Switch_mode(F.mode() + int(ch) - 76);
-                P.Update_area(F);
+                P.Switch_area(P.Area() + int(ch) - 76);
                 break;
-            default:
-                break;
+            default: break;
             }
             //Switch mode, update status
             if (ch == 75 || ch == 77) gotoxy(0, 0);
@@ -232,6 +219,9 @@ int main()
     }
     return 0;
 }
+
+//DEFINITIONS
+
 void Norming_string(string& s)
 {
     if (s == "") return;
@@ -252,43 +242,17 @@ void Norming_string(string& s)
             }
     }
 }
-void File_management::Update_numofque(int socau)
-{
-    this->socau = socau;
-    fstream f;
-    f.open("data/LY_file2.dat", ios::trunc | ios::out);
-    f << socau;
-    f.close();
-}
-void File_management::Switch_mode(int k)
-{
-    if (k < 0) k = n; else if (k > n) k = 0;
-    defmode = k;
-}
-int File_management::mode()
-{
-    return defmode;
-}
-string File_management::name_of_file(int k)
-{
-    return all_file[k];
-}
-string File_management::deffile()
-{
-    return ("notebook/" + all_file[defmode] + ".txt");
-}
-string File_management::deffilef()
-{
-    return ("data/" + all_file[defmode] + "_f.dat");
-}
+
+//FILE MANAGEMENT
+
 void File_management::Check_files()
 {
     fstream f;
     f.open("data/LY_connected_files.dat");
-    if (f.fail()) 
-    { 
-        cout << "LOI: Khong mo duoc file dia chi: LY_connected_files.dat\n\n"; 
-        ERROR_TO_CLOSE(); 
+    if (f.fail())
+    {
+        cout << "LOI: Khong mo duoc file dia chi: LY_connected_files.dat\n\n";
+        ERROR_TO_CLOSE();
     }
     while (1 > 0)
     {
@@ -300,92 +264,113 @@ void File_management::Check_files()
 
     for (int i = 1; i <= n; i++)
     {
-        defmode = i;
-        f.open(deffile());
+        f.open(file_address(i));
         if (f.fail())
         {
-            cout << "+Khong chua san: " << deffile() << "-->Tu dong tao\n";
+            cout << "+Khong chua san: " << file_address(i) << "-->Tu dong tao\n";
             f.close();
-            f.open(deffile(), ios::trunc | ios::out); 
+            f.open(file_address(i), ios::trunc | ios::out);
         }
         f.close();
 
-        f.open(deffilef());
+        f.open(file_f_address(i));
         if (f.fail())
         {
-            cout << "+Khong chua san: " << deffile() << "-->Tu dong tao\n";
+            cout << "+Khong chua san: " << file_address(i) << "-->Tu dong tao\n";
             f.close();
-            f.open(deffilef(), ios::trunc | ios::out);
+            f.open(file_f_address(i), ios::trunc | ios::out);
         }
         f.close();
     }
-    defmode = 0;
 
     f.open("data/LY_file2.dat");
     if (f.fail()) { cout << "LOI: Khong mo duoc file dia chi: LY_file2.dat\n"; f.close(); ERROR_TO_CLOSE(); }
     f >> socau;
     f.close();
 }
-void File_management::Read_words(Word_parcel &P)
+int File_management::Num_of_que()
 {
-    fstream f1, f2;
-    string temp;
-    vector<string> line;
-    int line_int = 0, fr = 0, ff = 0;
-    bool check;
-
-
-    f1.open(deffile().c_str());
-    f2.open(deffilef().c_str());
-    P.new_area();
-    Word wordp;
-
-    while (true)
-    {
-        temp = "";
-        getline(f1, temp);
-        line_int++;
-        if (line_int > 1 && (temp == "" || temp[0] != '/' || temp[1] != '/'))
-        {
-            if (!wordp.Get_word(line, wordp))
-            {
-                cout << "LOI: DONG KHONG DUNG CU PHAP: \n";
-                cout << deffile() << ": \n";
-                for (int i = 0; i < line.size(); i++) cout << line[i] << endl;
-                ERROR_TO_CLOSE();
-            }
-            fr = 0; ff = 0;
-            f2 >> fr >> ff;
-            wordp.fr = fr;
-            wordp.fr = ff;
-            P.Add_word(wordp);
-            line.clear();
-        }
-        if (temp == "") break;
-        line.push_back(temp);
-    }
-    f1.close();
-    f2.close();
+    return socau;
+}
+int File_management::Num_of_file()
+{
+    return n;
+}
+string File_management::file_name(int k)
+{
+    return all_file[k];
+}
+string File_management::file_address(int k)
+{
+    return ("notebook/" + all_file[k] + ".txt");
+}
+string File_management::file_f_address(int k)
+{
+    return ("data/" + all_file[k] + "_f.dat");
 }
 void File_management::Collect(Word_parcel &P)
 {
     Check_files();
     for (int i = 1; i <= n; i++)
     {
-        defmode = i;
-        Read_words(P);
+        fstream f1, f2;
+        string temp;
+        vector<string> line;
+        int line_int = 0, fr = 0, ff = 0;
+        bool check;
+
+
+        f1.open(file_address(i).c_str());
+        f2.open(file_f_address(i).c_str());
+        P.new_area();
+        Word wordp;
+
+        while (true)
+        {
+            temp = "";
+            getline(f1, temp);
+            line_int++;
+            if (line_int > 1 && (temp == "" || temp[0] != '/' || temp[1] != '/'))
+            {
+                if (!wordp.Get_word(line, wordp))
+                {
+                    cout << "LOI: DONG KHONG DUNG CU PHAP: \n";
+                    cout << file_address(i) << ": \n";
+                    for (int k = 0; k < line.size(); k++) cout << line[k] << endl;
+                    ERROR_TO_CLOSE();
+                }
+                fr = 0; ff = 0;
+                f2 >> fr >> ff;
+                wordp.fr = fr;
+                wordp.ff = ff;
+                P.Add_word(wordp);
+                line.clear();
+            }
+            if (temp == "") break;
+            line.push_back(temp);
+        }
+        f1.close();
+        f2.close();
     }
+}
+void File_management::Update_numofque(int socau)
+{
+    this->socau = socau;
+    fstream f;
+    f.open("data/LY_file2.dat", ios::trunc | ios::out);
+    f << socau;
+    f.close();
 }
 void File_management::Add_file(string s)
 {
     fstream f;
     f.open("data/LY_connected_files.dat", ios::trunc | ios::out);
     for (int i = 1; i <= Num_of_file(); i++)
-        f << name_of_file(i) << endl;
+        f << file_name(i) << endl;
     f << s << endl;
     f.close();
 }
-void File_management::Unconnected_files(int* file, int sl)
+void File_management::Unconnect_files(int* file, int sl)
 {
     bool checkedfile[20] = { };
     for (int i = 1; i <= sl; i++)
@@ -393,37 +378,47 @@ void File_management::Unconnected_files(int* file, int sl)
     fstream f;
     f.open("data/LY_connected_files.dat", ios::trunc | ios::out);
     for (int i = 1; i <= Num_of_file(); i++)
-        if (checkedfile[i] == false) f << name_of_file(i) << endl;
+        if (checkedfile[i] == false) f << file_name(i) << endl;
     f.close();
 }
-void File_management::Add_word(Word W)
+void File_management::Add_word(Word_parcel P, int file)
 {
-    vector<string> line;
-    line = Word_to_lines(W);
+    vector<string> lines, temp_lines;
+    for (int i = 1; i <= P.Num(); i++)
+    {
+        if(i==1 || P[i].word()!=P[i-1].word())
+            temp_lines = P[i].lines();
+        else temp_lines = P[i].lines(0);
+        lines.reserve(lines.size() + temp_lines.size());
+        lines.insert(lines.end(), temp_lines.begin(), temp_lines.end());
+        temp_lines.clear();
+    }
     fstream f;
-    f.open(("notebook/" + name_of_file(mode()) + ".txt").c_str(), ios::app);
-    for (int i = 0; i < line.size(); i++)
-        f << line[i] << endl;
+    f.open(file_address(file).c_str(), ios::app);
+    for (int i = 0; i < lines.size(); i++)
+        f << lines[i] << endl;
+    f.close();
 }
 void File_management::Update_score(Word_parcel P)
 {
-    fstream f1;
+    fstream f;
+    int P_area = P.Area();
     for (int i = 1; i <= Num_of_file(); i++)
     {
-        if (mode() != 0) i = Num_of_file() + 1;
-        else
-        {
-            Switch_mode(i); //all file mode, switch each mode to write
-            P.Update_area(*this);
-        }
-        f1.open((deffilef()).c_str(), ios::trunc | ios::out);
+        if (P_area == 0) P.Switch_area(i);
+        else i = Num_of_file() + 1;
+
+        f.open((file_f_address(P.Area())).c_str(), ios::trunc | ios::out);
         for (int i = P.from(); i <= P.to(); i++)
         {
-            f1 << P.a[i].fr << " " << P.a[i].ff << endl;
+            f << P[i].fr << " " << P[i].ff << endl;
         }
-        f1.close();
+        f.close();
     }
 }
+
+//WORD
+
 bool Word::Find_word_in_example()
 {
     string tw = w;
@@ -543,7 +538,7 @@ void Word::Choose_word_in_example()
     else
     {
         sp = Dict.Find_speech(w);
-        w = Dict.Baseword(Dict.Find_baseword(sp));
+        if(sp!=0) w = Dict.Baseword(Dict.Find_baseword(sp));
     }
 }
 string Word::word()
@@ -620,7 +615,7 @@ bool Word::Get_word(vector<string> line, Word pre)
                 if (v >= 0)
                 {
                     sp = Dict.Find_speech(w);
-                    w = Dict.Baseword(Dict.Find_baseword(sp));
+                    if(sp!=0) w = Dict.Baseword(Dict.Find_baseword(sp));
                 }
                 else sp = 0;
                 count_++; for_meaning = 1;
@@ -653,25 +648,34 @@ bool Word::Get_word(Word pre)
     w = pre.w; 
     if (Find_word_in_example())
     {
+        m = pre.m;
+        sp = Dict.Find_speech(w);
         Get_note();
         return true;
     }
     else return false;
 }
-vector<string> Word_to_lines(Word W)
+vector<string> Word::lines(bool newword)
 {
-    vector<string> line;
-    line.push_back("");
-    for (int i = 0; i < W.e.length(); i++)
-    {
-        if (i == W.c1 && W.sp == 0) line[0] += '\\';
-        line[0] += W.e[i];
-        if (i == W.c2) line[0] += '<' + W.m + ">";
-    }
-    for (int i = 0; i < W.GC.size(); i++)
-        line.push_back("//" + W.GC[i]);
+    vector<string> line(1);
+    //cau
+    if (newword == 1)
+        for (int i = 0; i < e.length(); i++)
+        {
+            if (i == c1 && sp == 0) line[0] += '\\';
+            line[0] += e[i];
+            if (i == c2) line[0] += '<' + m + ">";
+        }
+    else
+        line[0] = "+" + e;
+    //ghi chu
+    for (int i = 0; i < GC.size(); i++)
+        line.push_back("//" + GC[i]);
     return line;
 }
+
+//WORD PARCEL
+
 void Word_parcel::range_of_this_word(int k, int& u, int& v)
 {
     u = k; v = k;
@@ -723,6 +727,7 @@ void Word_parcel::new_area()
 {
     int k = pos_area[pos_area.size() - 1];
     pos_area.push_back(k);
+    num_of_area++;
 }
 void Word_parcel::Add_word(Word wordp)
 {
@@ -789,6 +794,9 @@ void Word_parcel::Print_word(int pos, int stt, int searchmode)
         }
     }
 }
+
+//SEARCH SOLUTON
+
 void Search_solution::set_requi(int l, int& scch, int& dogian)
 {
     if (l >= 12) { scch = l - 3; dogian = l + 3; }
@@ -847,34 +855,33 @@ void Search_solution::Search_all(string s, File_management F, Word_parcel& P)
     seperate_word(s);
 
     bool c = 0;
-    for (int k = 1; k <= F.Num_of_file(); k++)
+    for (int file = 1; file <= F.Num_of_file(); file++)
     {
-        F.Switch_mode(k);
-        P.Update_area(F);
+        P.Switch_area(file);
         P.sapxepabc();
         for (int i = P.from(); i <= P.to(); i++)
         {
-            if (i == P.from() || P.a[i].w != P.a[i - 1].w || c == 0) c = 0;
+            if (i == P.from() || P[i].w != P.a[i - 1].w || c == 0) c = 0;
 
-            if (c == 0 && search_in(P.a[i].w, rate) == true) 
+            if (c == 0 && search_in(P[i].w, rate) == true) 
             {
                 result.push_back(pa_int3(rate, pa_int2(i, 1))); 
                 c = 1; 
             }
-            if (c == 0 && search_in(P.a[i].m, rate)) 
+            if (c == 0 && search_in(P[i].m, rate)) 
             {
                 result.push_back(pa_int3(rate, pa_int2(i, 2))); 
                 c = 1; 
             }
-            if (c == 0 && search_in(P.a[i].e, rate) == true) 
+            if (c == 0 && search_in(P[i].e, rate) == true) 
             {
                 result.push_back(pa_int3(rate, pa_int2(i, 3))); 
                 c = 1; 
             }
-            if (c == 0 && P.a[i].GC.size() > 0)
+            if (c == 0 && P[i].GC.size() > 0)
             {
-                for (int j = 0; j < P.a[i].GC.size(); j++)
-                    if (c == 0 && search_in(P.a[i].GC[j], rate) == true)
+                for (int j = 0; j < P[i].GC.size(); j++)
+                    if (c == 0 && search_in(P[i].GC[j], rate) == true)
                     {
                         result.push_back(pa_int3(rate, pa_int2(i, 4 + j)));
                         c = 1;
@@ -892,40 +899,22 @@ void Search_solution::Show_results(File_management F, Word_parcel P)
     {
         textcolor(8);
         mode = P.find_area_from_pos(result[i].second.first);
-        F.Switch_mode(mode);
-        cout << ">" << F.name_of_file(mode) << endl;
+        cout << ">" << F.file_name(mode) << endl;
         P.Print_word(result[i].second.first, i + 1, result[i].second.second);
     }
 }
-void Add_words(File_management F)
-{
-    Word added_word;
-    added_word.Get_word();
-    F.Add_word(added_word);
-    cout << "------------------------------\n";
-    cout << "Duoc them vao " << F.deffile() << endl;
-    added_word.Print_this_word();
-
-    Word added_word_2;
-    while (added_word_2.Get_word(added_word))
-    {
-        added_word_2.Print_this_word();
-        F.Add_word(added_word_2);
-        added_word_2 = Word();
-    }
-}
-void show_status(File_management F, Word_parcel p)
+void show_status(File_management F, Word_parcel P)
 {
     cout << "Tai du lieu thanh cong!\n";
     cout << "                                                           \n";
     cout << "                                                           \n";
     gotoxy(0, 1);
-    if (F.mode() == 0) cout << ">TAT CA CAC FILE"; else cout << ">" << F.name_of_file(F.mode());
+    if (P.Area()==0) cout << ">TAT CA CAC FILE"; else cout << ">" << F.file_name(P.Area());
     textcolor(8);
-    cout << " " << p.progress() << "%" << " (" << p.Num() << ")\n";
+    cout << " " << P.progress() << "%" << " (" << P.Num() << ")\n";
     for (int i = 0; i <= F.Num_of_file(); i++)
     {
-        if (i == F.mode()) { textcolor(14); cout << "====="; textcolor(8); }
+        if (i == P.Area()) { textcolor(14); cout << "====="; textcolor(8); }
         else cout << "=====";
     }
     textcolor(7);
@@ -989,21 +978,22 @@ void MODE3(File_management F, Word_parcel P)
     // giai quyet cau chuyen nhieu cau hoi chung 1 fr va random thu tu
     for (int i = begin; i <= P.to(); i++)
     {
-        if (i - begin + 1 > socau && P.a[i].fr*2 + P.a[i].ff != P.a[i - 1].fr*2 + P.a[i - 1].ff)
+        if (i - begin + 1 > socau && P[i].fr*2 + P[i].ff != P[i - 1].fr*2 + P[i - 1].ff)
         {
             pos = i - 1; break;
         }
-        P.a[i].ran = (rand() % 101) + 101 * (P.a[i].fr*2 + P.a[i].ff);
+        P[i].ran = (rand() % 101) + 101 * (P[i].fr*2 + P[i].ff);
+        P[i].ran = (rand() % 101) + 101 * (P[i].fr*2 + P[i].ff);
     }
     P.sapxepran(pos); // thay doi thu thu trong pham vi
-    for (int i = 1; i <= socau; i++) P.a[i].ran = (rand() % 101);
+    for (int i = 1; i <= socau; i++) P[i].ran = (rand() % 101);
     P.sapxepran(begin + socau - 1);
 
     //IN CAU HOI
     for (int i = begin; i <= begin + socau - 1; i++)
     {
         cout << i << ") ";
-        P.a[i].Print_question();
+        P[i].Print_question();
         cout << "\n\n";
     }
 
@@ -1013,15 +1003,15 @@ void MODE3(File_management F, Word_parcel P)
     cout << endl << "Nhap dap an (go ? de hien goi y): \n";
     for (int i = begin; i <= begin + socau - 1; i++)
     {
-        correct = Collect_answers(P.a[i].word(), i - begin + 1);
+        correct = Collect_answers(P[i].word(), i - begin + 1);
         if (correct == true)
         {
             cout << "-O\n";
-            P.a[i].fr ++; ans[i] = 1;
+            P[i].fr ++; ans[i] = 1;
         }
         else {
             cout << "-X\n";
-            P.a[i].fr = min(1, P.a[i].fr);
+            P[i].fr = min(1, P[i].fr);
             ans[i] = 0;
         }
     }
@@ -1030,12 +1020,12 @@ void MODE3(File_management F, Word_parcel P)
     cout << endl << "====KET QUA & TU VUNG====\n";
     for (int i = begin; i <= begin + socau - 1; i++)
     {
-        P.a[i].ff++;
+        P[i].ff++;
         if (ans[i] == false)
         {
             textcolor(14);
             cout << i - begin + 1 << ")";
-            P.a[i].Print_this_word(1, -1);
+            P[i].Print_this_word(1, -1);
         }
     }
     P.sapxepvgoc();
@@ -1064,9 +1054,8 @@ void MODE5(File_management F, Word_parcel P)
     cout << "-Bo tu vung da duoc ket noi: \n";
     for (int i = 1; i <= F.Num_of_file(); i++)
     {
-        space(5);  cout << "+" << i << ": " << F.name_of_file(i) << endl;
+        space(5);  cout << "+" << i << ": " << F.file_name(i) << endl;
     }
-
     cout << "-------------------------------\n";
     string lenh;
     cout << "5. Them tu vung\n" << "2. Ket noi bo tu vung\n" << "3. Huy ket noi bo tu vung\n" << "4. Sua so cau hoi\n";
@@ -1077,10 +1066,30 @@ void MODE5(File_management F, Word_parcel P)
     {
         cout << "====================================THEM TU VUNG===================================\n";
         textcolor(8);
-        if (F.mode() == 0) cout << ">TAT CA CAC FILE\n"; else cout << ">" << F.name_of_file(F.mode()) << endl;
-        textcolor(7);
-        if (F.mode() != 0) Add_words(F);
-        else cout << "KHONG THEM DUOC!\n";
+        if (P.Area()==0) cout << "KHONG THEM DUOC\n"; 
+        else
+        {
+            cout << ">" << F.file_name(P.Area()) << endl; 
+            textcolor(7);
+            Word_parcel addedP; 
+            Word addedword;
+            addedword.Get_word();
+            addedP.new_area();  
+            addedP.Add_word(addedword);
+            addedP.Print_word();
+
+            addedword=Word();
+            while (addedword.Get_word(addedP[1]))
+            {
+                addedP.Add_word(addedword);
+                addedP.Print_word();
+                addedword = Word();
+            }
+            cout << "->HET\n";
+            cout << "------------------------------\n";
+            cout << "->Da them them vao " << F.file_name(P.Area()) << endl;
+            F.Add_word(addedP, P.Area());
+        }
     }
     else if (ch == '2')
     {
@@ -1107,9 +1116,9 @@ void MODE5(File_management F, Word_parcel P)
                 continue;
             }
             file[i] = tam;
-            cout << " X " << F.name_of_file(tam) << endl;
+            cout << " X " << F.file_name(tam) << endl;
         }
-        F.Unconnected_files(file, sl);
+        F.Unconnect_files(file, sl);
     }
     else if (ch == '4')
     {

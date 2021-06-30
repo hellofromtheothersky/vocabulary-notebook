@@ -21,7 +21,6 @@ class File_management
 {
     string all_file[20];
     int socau, n;
-    void Check_files();
 public:
     File_management()
     {
@@ -33,11 +32,12 @@ public:
     string file_name(int k);
     string file_address(int);
     string file_f_address(int);
-    void Collect(Word_parcel &P);
+    void Check_files();
+    void Load_words_data(Word_parcel &P);
     void Update_numofque(int socau);
     void Update_score(Word_parcel P);
     void Add_file(string s);
-    void Unconnect_files(int* file, int sl);
+    void Unconnect_file(int file);
     void Add_word(Word_parcel, int);
 };
 class Word
@@ -163,12 +163,14 @@ public:
 };
 void show_status(File_management F, Word_parcel p);
 bool Collect_answers(string kq, int stt);
-
 void MODE1(File_management F, Word_parcel P);
-void MODE3(File_management F, Word_parcel P);
+void MODE3(File_management &F, Word_parcel &P);
 void MODE4(Word_parcel P);
 void MODE5(File_management F, Word_parcel P);
-void MODE6();
+void MODE6_UNCONNECTFILE(File_management, Word_parcel);
+void MODE6_DESKTOP(File_management, Word_parcel);
+void MODE6_ADDFILE(File_management);
+void MODE6_ABOUT();
 
 //MAIN
 
@@ -177,13 +179,15 @@ int main()
     clock_t start;
     start = clock();
     Dict.Collect_data();
+    int mode6_menu=-1;
     char ch;
     while (true)
     {
         system("cls");
         File_management F;
         Word_parcel P;
-        F.Collect(P);
+        F.Check_files();
+        F.Load_words_data(P);
         while (true)
         {
             show_status(F, P);
@@ -192,8 +196,20 @@ int main()
             cout << "2. Thong ke (x)\n";
             cout << "3. Kiem tra tu vung" << endl << endl;
             cout << "4. Tat ca tu vung\n";
-            cout << "5. Them\n";
-            cout << "6  ?\n";
+            cout << "5. Them tu vung\n";
+            cout << "6  #\n";
+            if (mode6_menu > 0)
+            {
+                if (mode6_menu == 1) textcolor(7); else textcolor(8);
+                cout << "   Huy ket noi file nay\n";
+                if (mode6_menu == 2) textcolor(7); else textcolor(8);
+                cout << "   Chinh tren desktop (x)\n";
+                if (mode6_menu == 3) textcolor(7); else textcolor(8);
+                cout << "   Them file khac\n";
+                if (mode6_menu == 4) textcolor(7); else textcolor(8);
+                cout << "   ?\n";
+                textcolor(7);
+            }
             ch = _getch();
             switch (ch)
             {
@@ -202,18 +218,29 @@ int main()
             case '3': MODE3(F, P); break;
             case '4': MODE4(P); break;
             case '5': MODE5(F, P); break;
-            case '6': MODE6(); break;
+            case '6': mode6_menu *= -1; break;
             case -32:
                 ch = _getch(); // de lay phim mui ten
-                P.Switch_area(P.Area() + int(ch) - 76);
+                if (ch == 75 || ch == 77) P.Switch_area(P.Area() + int(ch) - 76);
+                if (mode6_menu > 0)
+                {
+                    if (ch == 72) mode6_menu = (mode6_menu >= 2) ? mode6_menu - 1 : 4;
+                    if (ch == 80) mode6_menu = (mode6_menu <= 3) ? mode6_menu + 1 : 1;
+                }
+                break;
+            case 13:
+                if (mode6_menu == 1) MODE6_UNCONNECTFILE(F, P);
+                if (mode6_menu == 3) MODE6_ADDFILE(F);
+                if (mode6_menu == 4) MODE6_ABOUT();
                 break;
             default: break;
             }
-            //Switch mode, update status
-            if (ch == 75 || ch == 77) gotoxy(0, 0);
-            else system("cls");
-            //Files change, need to read again
-            if (ch == '3' || ch == '5') break;
+
+            //Switch mode, change setting-> update status
+            if (ch == 75 || ch == 77 || ch == 72 || ch == 80) gotoxy(0, 0);
+            else system("cls"); 
+            //Files changed, Load all data again
+            if (ch == '5' || (ch==13 && mode6_menu>0)) break; 
             start = clock();
         }
     }
@@ -308,9 +335,8 @@ string File_management::file_f_address(int k)
 {
     return ("data/" + all_file[k] + "_f.dat");
 }
-void File_management::Collect(Word_parcel &P)
+void File_management::Load_words_data(Word_parcel &P)
 {
-    Check_files();
     for (int i = 1; i <= n; i++)
     {
         fstream f1, f2;
@@ -370,15 +396,12 @@ void File_management::Add_file(string s)
     f << s << endl;
     f.close();
 }
-void File_management::Unconnect_files(int* file, int sl)
+void File_management::Unconnect_file(int file)
 {
-    bool checkedfile[20] = { };
-    for (int i = 1; i <= sl; i++)
-        checkedfile[file[i]] = true;
     fstream f;
     f.open("data/LY_connected_files.dat", ios::trunc | ios::out);
     for (int i = 1; i <= Num_of_file(); i++)
-        if (checkedfile[i] == false) f << file_name(i) << endl;
+        if (i!=file) f << file_name(i) << endl;
     f.close();
 }
 void File_management::Add_word(Word_parcel P, int file)
@@ -961,13 +984,23 @@ bool Collect_answers(string kq, int stt)
     if (traloi == kq) return true;
     return false;
 }
-void MODE3(File_management F, Word_parcel P)
+void MODE3(File_management &F, Word_parcel &P)
 {
-    int socau = min(P.Num(), F.Num_of_que());
+    int socau;
     cout << "====================================KIEM TRA TU VUNG===================================\n";
-    cout << "Co " << socau << " cau hoi, nhap phim bat ky" << endl << endl;
     char ch;
-    ch = _getch();
+    cout << "(Backspace de chinh so cau hoi)\n";
+    do
+    {
+        socau = min(P.Num(), F.Num_of_que());
+        cout << "Co " << socau << " cau hoi, nhap phim bat ky:\n\n";
+        ch = _getch();
+        if (ch == 8)
+        {
+            cout << "So cau: "; cin >> socau;
+            F.Update_numofque(socau);
+        }
+    } while (ch == 8);
 
     //TAO DU LIEU CAU HOI
     srand(time(0));
@@ -1001,6 +1034,7 @@ void MODE3(File_management F, Word_parcel P)
     bool correct;
     bool* ans = new bool[P.to() + 1];
     cout << endl << "Nhap dap an (go ? de hien goi y): \n";
+    cin.ignore();
     for (int i = begin; i <= begin + socau - 1; i++)
     {
         correct = Collect_answers(P[i].word(), i - begin + 1);
@@ -1048,95 +1082,63 @@ void MODE4(Word_parcel P)
 }
 void MODE5(File_management F, Word_parcel P)
 {
-    cout << "====================================CHINH  SUA===================================" << endl << endl;
-    cout << "-So cau hoi moi bai tap: " << F.Num_of_que() << endl;
-    cout << "-------------------------------\n";
-    cout << "-Bo tu vung da duoc ket noi: \n";
-    for (int i = 1; i <= F.Num_of_file(); i++)
+    cout << "====================================THEM TU VUNG===================================\n";
+    textcolor(8);
+    if (P.Area() == 0) cout << "CHON FILE CU THE DE THEM\n";
+    else
     {
-        space(5);  cout << "+" << i << ": " << F.file_name(i) << endl;
-    }
-    cout << "-------------------------------\n";
-    string lenh;
-    cout << "5. Them tu vung\n" << "2. Ket noi bo tu vung\n" << "3. Huy ket noi bo tu vung\n" << "4. Sua so cau hoi\n";
-    cout << "-------\n";
-    char ch;
-    ch = _getch();
-    if (ch == '5')
-    {
-        cout << "====================================THEM TU VUNG===================================\n";
-        textcolor(8);
-        if (P.Area()==0) cout << "KHONG THEM DUOC\n"; 
-        else
+        cout << ">" << F.file_name(P.Area()) << endl;
+        textcolor(7);
+        Word_parcel addedP;
+        Word addedword;
+        addedword.Get_word();
+        addedP.new_area();
+        addedP.Add_word(addedword);
+        addedP.Print_word();
+
+        addedword = Word();
+        while (addedword.Get_word(addedP[1]))
         {
-            cout << ">" << F.file_name(P.Area()) << endl; 
-            textcolor(7);
-            Word_parcel addedP; 
-            Word addedword;
-            addedword.Get_word();
-            addedP.new_area();  
             addedP.Add_word(addedword);
             addedP.Print_word();
-
-            addedword=Word();
-            while (addedword.Get_word(addedP[1]))
-            {
-                addedP.Add_word(addedword);
-                addedP.Print_word();
-                addedword = Word();
-            }
-            cout << "->HET\n";
-            cout << "------------------------------\n";
-            cout << "->Da them them vao " << F.file_name(P.Area()) << endl;
-            F.Add_word(addedP, P.Area());
+            addedword = Word();
         }
-    }
-    else if (ch == '2')
-    {
-        string s;
-        cout << "THEM FILE > ";
-        getline(cin, s);
-        F.Add_file(s);
-    }
-    else if (ch == '3')
-    {
-        string s;
-        int sl;
-        do { cout << "SO LUONG >"; cin >> sl; } while (sl<1 || sl>F.Num_of_file());
-        int file[20];
-        int tam;
-        cout << "NHAP STT FILE! \n";
-        for (int i = 1; i <= sl; i++)
-        {
-            cout << "-" << i << ": "; cin >> tam;
-            if (tam <= 0 || tam > F.Num_of_file())
-            {
-                cout << "LOI\n";
-                i--;
-                continue;
-            }
-            file[i] = tam;
-            cout << " X " << F.file_name(tam) << endl;
-        }
-        F.Unconnect_files(file, sl);
-    }
-    else if (ch == '4')
-    {
-        int socau;
-        cout << "SO CAU > ";
-        cin >> socau;
-        F.Update_numofque(socau);
+        cout << "->HET\n";
+        cout << "------------------------------\n";
+        cout << "->Da them them vao " << F.file_name(P.Area()) << endl;
+        F.Add_word(addedP, P.Area());
     }
     textcolor(7);
     cout << endl;
     system("pause");
 }
-void MODE6()
+void MODE6_UNCONNECTFILE(File_management F, Word_parcel P)
+{
+    cout << "--------------------\n";
+    if (P.Area() == 0) {
+        cout << "CHON FILE CU THE DE HUY\n"; system("pause");
+    }
+    else
+    {
+        cout << "ENTER DE HUY KET NOI: " << F.file_name(P.Area())<<endl;
+        char ch = _getch();
+        if(ch==13) F.Unconnect_file(P.Area());
+    }
+}
+void MODE6_ADDFILE(File_management F)
+{
+    string s;
+    cout << "--------------------\n";
+    cout << "THEM FILE > ";
+    getline(cin, s);
+    F.Add_file(s);
+}
+void MODE6_ABOUT()
 {
     cout << "====================================THONG TIN===================================" << endl << endl;
     cout << "--------------------------------------------\n";
     textcolor(15);
-    cout << "LY_WORD (Update Version 10/6/2021)\n";
+    cout << "LY_WORD (Update Version 30/6/2021)\n";
     textcolor(9);
     cout << "->LY Words-->\n\n";
     textcolor(7);

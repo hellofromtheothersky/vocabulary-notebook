@@ -27,6 +27,15 @@
     <ClCompile Include="dict.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="week.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="date.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="curtime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="screen.h">
@@ -36,6 +45,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dict.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="week.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="date.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="curtime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

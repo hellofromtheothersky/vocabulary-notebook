@@ -1,12 +1,15 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <algorithm>
 #include <fstream>
 #include <string>
+#include <stdio.h>
 #include<conio.h> //de dung duoc ham _getch doc ki tu tu ban phim
 #include"screen.h"
 #include"strsearch.h"
 #include"dict.h"
+#include"week.h"
+#include"curtime.h"
 using namespace std;
 typedef pair<int, int> pa_int2;
 typedef pair<int, pa_int2> pa_int3;
@@ -33,7 +36,7 @@ public:
     string file_address(int);
     string file_f_address(int);
     void Check_files();
-    void Load_words_data(Word_parcel &P);
+    void Load_words_data(Word_parcel &P, week& Week);
     void Update_numofque(int socau);
     void Update_score(Word_parcel P);
     void Add_file(string s);
@@ -164,7 +167,99 @@ public:
 void show_status(File_management F, Word_parcel p);
 bool Collect_answers(string kq, int stt);
 void MODE1(File_management F, Word_parcel P);
-void MODE3(File_management &F, Word_parcel &P);
+void MODE2(week);
+void MODE3(File_management& F, Word_parcel& P, week& Week)
+{
+    int socau;
+    cout << "====================================KIEM TRA TU VUNG===================================\n";
+    char ch;
+    cout << "(Backspace de chinh so cau hoi)\n";
+    do
+    {
+        socau = min(P.Num(), F.Num_of_que());
+        cout << "Co " << socau << " cau hoi, nhap phim bat ky:\n\n";
+        ch = _getch();
+        if (ch == 8)
+        {
+            cout << "So cau: "; cin >> socau;
+            F.Update_numofque(socau);
+        }
+    } while (ch == 8);
+
+    //TAO DU LIEU CAU HOI
+    srand(time(0));
+    //cin>>socau;
+    int begin = P.from();
+    int pos = P.to();
+    P.sapxeptanso(); //main random
+                     // giai quyet cau chuyen nhieu cau hoi chung 1 fr va random thu tu
+    for (int i = begin; i <= P.to(); i++)
+    {
+        if (i - begin + 1 > socau && P[i].fr * 2 + P[i].ff != P[i - 1].fr * 2 + P[i - 1].ff)
+        {
+            pos = i - 1; break;
+        }
+        P[i].ran = (rand() % 101) + 101 * (P[i].fr * 2 + P[i].ff);
+        P[i].ran = (rand() % 101) + 101 * (P[i].fr * 2 + P[i].ff);
+    }
+    P.sapxepran(pos); // thay doi thu thu trong pham vi
+    for (int i = 1; i <= socau; i++) P[i].ran = (rand() % 101);
+    P.sapxepran(begin + socau - 1);
+
+    //IN CAU HOI
+    for (int i = begin; i <= begin + socau - 1; i++)
+    {
+        cout << i << ") ";
+        P[i].Print_question();
+        cout << "\n\n";
+    }
+
+    //LAY CAU TRA LOI
+    bool correct, n_crans=0;
+    vector <pa_int2> ans; 
+    cout << endl << "Nhap dap an (go ? de hien goi y): \n";
+    cin.seekg(0, ios::end);
+    cin.clear();
+    for (int i = begin; i <= begin + socau - 1; i++)
+    {
+        P[i].ff++;
+        correct = Collect_answers(P[i].word(), i - begin + 1);
+        if (correct == true)
+        {
+            cout << "-O\n";
+            P[i].fr++;
+            n_crans++;
+            ans.push_back(pa_int2(i - begin + 1, i));
+        }
+        else {
+            cout << "-X\n";
+            P[i].fr = min(1, P[i].fr);
+            ans.push_back(pa_int2(-(i - begin + 1), i));
+        }
+    }
+
+    //LUU VA IN KET QUA
+    cout << "\n-----------------\n";
+    cout << "KET QUA: Dung " << n_crans << "/" << socau;
+    cout << "\n-----------------\n";
+    for (int i = 0; i < ans.size(); i++)
+    {
+        if (ans[i].first < 0)
+        {
+            Week.AddToCurrentDay(P[-ans[i].first].word(), 2);
+            textcolor(12);
+            cout << "-X ";
+            textcolor(7);
+        }
+        else Week.AddToCurrentDay(P[ans[i].first].word(), 3);
+        P[abs(ans[i].first)].Print_this_word(1, -1);
+    }
+
+    P.sapxepvgoc();
+    F.Update_score(P);
+    cout << endl;
+    system("pause");
+}
 void MODE4(Word_parcel P);
 void MODE5(File_management F, Word_parcel P);
 void MODE6_UNCONNECTFILE(File_management, Word_parcel);
@@ -176,6 +271,9 @@ void MODE6_ABOUT();
 
 int main()
 {
+    curtime CT;
+    week Week;
+    Week.Load(CT.Day(), CT.Month(), CT.Year());
     clock_t start;
     start = clock();
     Dict.Collect_data();
@@ -187,13 +285,13 @@ int main()
         File_management F;
         Word_parcel P;
         F.Check_files();
-        F.Load_words_data(P);
+        F.Load_words_data(P, Week);
         while (true)
         {
             show_status(F, P);
             cout << clock() - start << "ms\n";
             cout << "1. Tim kiem" << endl << endl;
-            cout << "2. Thong ke (x)\n";
+            cout << "2. Thong ke "; CT.Print(); cout << endl;
             cout << "3. Kiem tra tu vung" << endl << endl;
             cout << "4. Tat ca tu vung\n";
             cout << "5. Them tu vung\n";
@@ -214,8 +312,8 @@ int main()
             switch (ch)
             {
             case '1': MODE1(F, P); break;
-            case '2': break;
-            case '3': MODE3(F, P); break;
+            case '2': MODE2(Week); break;
+            case '3': MODE3(F, P, Week); break;
             case '4': MODE4(P); break;
             case '5': MODE5(F, P); break;
             case '6': mode6_menu *= -1; break;
@@ -335,17 +433,16 @@ string File_management::file_f_address(int k)
 {
     return ("data/" + all_file[k] + "_f.dat");
 }
-void File_management::Load_words_data(Word_parcel &P)
+void File_management::Load_words_data(Word_parcel &P, week &Week)
 {
+    fstream f1, f2;
+    string temp;
+    vector<string> line;
+    int line_int = 0, fr, ff;
+    bool check;
+
     for (int i = 1; i <= n; i++)
     {
-        fstream f1, f2;
-        string temp;
-        vector<string> line;
-        int line_int = 0, fr = 0, ff = 0;
-        bool check;
-
-
         f1.open(file_address(i).c_str());
         f2.open(file_f_address(i).c_str());
         P.new_area();
@@ -365,8 +462,17 @@ void File_management::Load_words_data(Word_parcel &P)
                     for (int k = 0; k < line.size(); k++) cout << line[k] << endl;
                     ERROR_TO_CLOSE();
                 }
-                fr = 0; ff = 0;
+
+                fr = -1; ff = 0;
                 f2 >> fr >> ff;
+
+                if (fr == -1) {
+                    Week.AddToCurrentDay(wordp.word(), 1); fr = 0;
+                    f2.clear();
+                    f2 << " 0 0 ";
+                    f2.seekp(0, std::ios_base::end);
+                }
+
                 wordp.fr = fr;
                 wordp.ff = ff;
                 P.Add_word(wordp);
@@ -377,6 +483,9 @@ void File_management::Load_words_data(Word_parcel &P)
         }
         f1.close();
         f2.close();
+        line.clear(); line_int = 0;
+
+
     }
 }
 void File_management::Update_numofque(int socau)
@@ -596,6 +705,7 @@ void Word::Print_this_word(bool newword, int searchmode)
         textcolor(3); space(10);
         cout << "%(" << fr << ", " << ff << ")\n";
     }
+    textcolor(7);
 }
 void Word::Print_question()
 {
@@ -962,6 +1072,12 @@ void MODE1(File_management F, Word_parcel P)
     cout << endl;
     system("pause");
 }
+void MODE2(week Week)
+{
+    //cout << "====================================THONG KE===================================\n";
+    cout << endl;
+    Week.ShowProgress();
+}
 bool Collect_answers(string kq, int stt)
 {
     string traloi;
@@ -983,91 +1099,6 @@ bool Collect_answers(string kq, int stt)
     } while (traloi == "?");
     if (traloi == kq) return true;
     return false;
-}
-void MODE3(File_management &F, Word_parcel &P)
-{
-    int socau;
-    cout << "====================================KIEM TRA TU VUNG===================================\n";
-    char ch;
-    cout << "(Backspace de chinh so cau hoi)\n";
-    do
-    {
-        socau = min(P.Num(), F.Num_of_que());
-        cout << "Co " << socau << " cau hoi, nhap phim bat ky:\n\n";
-        ch = _getch();
-        if (ch == 8)
-        {
-            cout << "So cau: "; cin >> socau;
-            F.Update_numofque(socau);
-        }
-    } while (ch == 8);
-
-    //TAO DU LIEU CAU HOI
-    srand(time(0));
-    //cin>>socau;
-    int begin = P.from();
-    int pos = P.to();
-    P.sapxeptanso(); //main random
-    // giai quyet cau chuyen nhieu cau hoi chung 1 fr va random thu tu
-    for (int i = begin; i <= P.to(); i++)
-    {
-        if (i - begin + 1 > socau && P[i].fr*2 + P[i].ff != P[i - 1].fr*2 + P[i - 1].ff)
-        {
-            pos = i - 1; break;
-        }
-        P[i].ran = (rand() % 101) + 101 * (P[i].fr*2 + P[i].ff);
-        P[i].ran = (rand() % 101) + 101 * (P[i].fr*2 + P[i].ff);
-    }
-    P.sapxepran(pos); // thay doi thu thu trong pham vi
-    for (int i = 1; i <= socau; i++) P[i].ran = (rand() % 101);
-    P.sapxepran(begin + socau - 1);
-
-    //IN CAU HOI
-    for (int i = begin; i <= begin + socau - 1; i++)
-    {
-        cout << i << ") ";
-        P[i].Print_question();
-        cout << "\n\n";
-    }
-
-    //LAY CAU TRA LOI
-    bool correct;
-    bool* ans = new bool[P.to() + 1];
-    cout << endl << "Nhap dap an (go ? de hien goi y): \n";
-    cin.ignore();
-    for (int i = begin; i <= begin + socau - 1; i++)
-    {
-        correct = Collect_answers(P[i].word(), i - begin + 1);
-        if (correct == true)
-        {
-            cout << "-O\n";
-            P[i].fr ++; ans[i] = 1;
-        }
-        else {
-            cout << "-X\n";
-            P[i].fr = min(1, P[i].fr);
-            ans[i] = 0;
-        }
-    }
-
-    //LUU KET QUA & IN DAP AN
-    cout << endl << "====KET QUA & TU VUNG====\n";
-    for (int i = begin; i <= begin + socau - 1; i++)
-    {
-        P[i].ff++;
-        if (ans[i] == false)
-        {
-            textcolor(14);
-            cout << i - begin + 1 << ")";
-            P[i].Print_this_word(1, -1);
-        }
-    }
-    P.sapxepvgoc();
-    F.Update_score(P);
-    delete[] ans;
-    textcolor(7);
-    cout << endl;
-    system("pause");
 }
 void MODE4(Word_parcel P)
 {
@@ -1120,9 +1151,17 @@ void MODE6_UNCONNECTFILE(File_management F, Word_parcel P)
     }
     else
     {
-        cout << "ENTER DE HUY KET NOI: " << F.file_name(P.Area())<<endl;
+        cout <<"X " << F.file_name(P.Area()) << endl;
+        cout << "ENTER DE HUY KET NOI"<<endl;
+        cout << "(1 DE XOA HOAN TOAN)"<<endl;
         char ch = _getch();
         if(ch==13) F.Unconnect_file(P.Area());
+        if (ch == '1')
+        {
+            remove(F.file_address(P.Area()).c_str());
+            remove(F.file_f_address(P.Area()).c_str());
+            F.Unconnect_file(P.Area());
+        }
     }
 }
 void MODE6_ADDFILE(File_management F)
@@ -1138,7 +1177,7 @@ void MODE6_ABOUT()
     cout << "====================================THONG TIN===================================" << endl << endl;
     cout << "--------------------------------------------\n";
     textcolor(15);
-    cout << "LY_WORD (Update Version 30/6/2021)\n";
+    cout << "LY_WORD (4/7 update version)\n";
     textcolor(9);
     cout << "->LY Words-->\n\n";
     textcolor(7);

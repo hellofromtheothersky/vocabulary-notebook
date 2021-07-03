@@ -85,5 +85,4 @@ ipch/
 #Binary file
 *.dll
 *.exe
-*.dat
 *.txt

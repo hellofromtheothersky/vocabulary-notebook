@@ -20,9 +20,10 @@ void ERROR_TO_CLOSE()
 void Print_arow()
 {
     textcolor(14);
-    std::cout << "-->";
+    std::cout << "==>";
+    textcolor(7);
 }
 void space(int k)
 {
-    for (int i = 0; i < k; i++) std::cout << " ";
+    for (int i = 0; i < k; i++) cout << " ";
 }

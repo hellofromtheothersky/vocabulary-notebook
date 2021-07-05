@@ -15,7 +15,12 @@ public:
 	string content;
 	virtual void Print()
 	{
-		cout << content;
+		if (content.length() <= 12) cout << content;
+		else
+		{
+			string out = content.substr(0, 11)+"~";
+			cout << out;
+		}
 	}
 	virtual string Write() = 0;
 };

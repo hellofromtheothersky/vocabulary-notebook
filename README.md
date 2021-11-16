@@ -35,7 +35,9 @@ The main functions of my notebook are note words, review words, smart look-up.
 <img width="674" alt="Screenshot 2021-11-16 163655" src="https://user-images.githubusercontent.com/84280247/141960345-6efc75cb-b95b-4ac5-9120-5c3e2fd8c7f2.png">
 
 -Wrong answer->RED
--Right answrt ->WHITE
+
+-Right answer ->WHITE
+
 -Added word ->GREY
 
 ## Look-up->everywhere even if it is misspelled

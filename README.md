@@ -10,6 +10,17 @@ Firstly, it's not a dictionary, it is a notebook instead.
 
 The main functions of my notebook are note words, review words, smart look-up.
 
+
+## Week report graph (new update)
+
+<img width="674" alt="Screenshot 2021-11-16 163655" src="https://user-images.githubusercontent.com/84280247/141960345-6efc75cb-b95b-4ac5-9120-5c3e2fd8c7f2.png">
+
+-Wrong answer->RED
+
+-Right answer ->WHITE
+
+-Added word ->GREY
+
 ## Note words ->put the words in context:
 
 > _In my attempt to learn vocabulary, I realize that a good way to do it well is basing on their example, not the translating from vocabulary to its meaning._ 
@@ -29,16 +40,6 @@ The main functions of my notebook are note words, review words, smart look-up.
 ***Also, the printed question is random and THEN BASES ON how many times we answer this question wrong before and how many times it is printed!***
 
 <img width="686" alt="question" src="https://user-images.githubusercontent.com/84280247/122649594-b7729880-d158-11eb-8cd6-0f3136619598.PNG">
-
-## Week report graph (new update)
-
-<img width="674" alt="Screenshot 2021-11-16 163655" src="https://user-images.githubusercontent.com/84280247/141960345-6efc75cb-b95b-4ac5-9120-5c3e2fd8c7f2.png">
-
--Wrong answer->RED
-
--Right answer ->WHITE
-
--Added word ->GREY
 
 ## Look-up->everywhere even if it is misspelled
 
